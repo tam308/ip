@@ -1,90 +1,155 @@
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class HorseBot {
-    static String line = "______________________________________________________________________";
+    public static final int MAX_RECORDS = 100; //maximum list size
+    static String INDENT = "    ";
+    static String LINE = "______________________________________________________________________";
+    static String LOGO = """
+            .--------------------------------------------------------------------.
+            | __  __                                     ____            __      |
+            |/\\ \\/\\ \\                                   /\\  _`\\         /\\ \\__   |
+            |\\ \\ \\_\\ \\    ___   _ __   ____     __      \\ \\ \\L\\ \\    ___\\ \\ ,_\\  |
+            | \\ \\  _  \\  / __`\\/\\`'__\\/',__\\  /'__`\\     \\ \\  _ <'  / __`\\ \\ \\/  |
+            |  \\ \\ \\ \\ \\/\\ \\L\\ \\ \\ \\//\\__, `\\/\\  __/      \\ \\ \\L\\ \\/\\ \\L\\ \\ \\ \\_ |
+            |   \\ \\_\\ \\_\\ \\____/\\ \\_\\\\/\\____/\\ \\____\\      \\ \\____/\\ \\____/\\ \\__\\|
+            |    \\/_/\\/_/\\/___/  \\/_/ \\/___/  \\/____/       \\/___/  \\/___/  \\/__/|
+            '--------------------------------------------------------------------'""";
+    //ascii art generated with https://www.asciiart.eu/text-to-ascii-art
 
-    //print the chatbot's introductory message
-    public static void intro() {
-        String logo = """
-                .--------------------------------------------------------------------.
-                | __  __                                     ____            __      |
-                |/\\ \\/\\ \\                                   /\\  _`\\         /\\ \\__   |
-                |\\ \\ \\_\\ \\    ___   _ __   ____     __      \\ \\ \\L\\ \\    ___\\ \\ ,_\\  |
-                | \\ \\  _  \\  / __`\\/\\`'__\\/',__\\  /'__`\\     \\ \\  _ <'  / __`\\ \\ \\/  |
-                |  \\ \\ \\ \\ \\/\\ \\L\\ \\ \\ \\//\\__, `\\/\\  __/      \\ \\ \\L\\ \\/\\ \\L\\ \\ \\ \\_ |
-                |   \\ \\_\\ \\_\\ \\____/\\ \\_\\\\/\\____/\\ \\____\\      \\ \\____/\\ \\____/\\ \\__\\|
-                |    \\/_/\\/_/\\/___/  \\/_/ \\/___/  \\/____/       \\/___/  \\/___/  \\/__/|
-                '--------------------------------------------------------------------'""";
-        //ascii art generated with https://www.asciiart.eu/text-to-ascii-art
-        System.out.println(logo + "\nNeigh! I'm a Horse! How can i assist you?");
-        System.out.println(line);
-    }
-
-    static Task[] list = new Task[100]; //initialise list of size 100
+    static Task[] list = new Task[MAX_RECORDS]; //initialise array of Tasks
     static int listLength = 0;
 
-    //record whatever user inputs in a list
-    public static void record() {
+    //handle user inputs
+    public static void handleInput() {
         String userInput;
         Scanner in = new Scanner(System.in);
         userInput = in.nextLine();
         String[] userInputArray = userInput.split(" ");
-        String command = userInputArray[0]; //read the first word in user input as possible command
-        int markingIndex = 0; //to keep track of which index to mark/unmark after reading command
+        String command = userInputArray[0]; //read the first word in user input as command
+
         switch (command) {
         case "mark": //mark a task as done
-            markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-            list[markingIndex].setDone(true);
-            System.out.println(line);
-            System.out.println("Neigh! I've marked this task as done:");
-            System.out.print("[" + list[markingIndex].getStatusIcon() + "] ");
-            System.out.println(list[markingIndex].getDescription());
-            System.out.println(line);
+            markItemAsDone(userInputArray);
             break;
         case "unmark": //mark a task as undone
-            markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-            list[markingIndex].setDone(false);
-            System.out.println(line);
-            System.out.println("Neigh... This task has been marked undone:");
-            System.out.print("[" + list[markingIndex].getStatusIcon() + "] ");
-            System.out.println(list[markingIndex].getDescription());
-            System.out.println(line);
+            unmarkItem(userInputArray);
             break;
-
         case "bye": //terminate program
-            System.out.println(line);
-            System.out.println("Bye bye! It was Neigh-ce to meet you!");
-            System.out.println(line);
-            System.exit(0);
+            exitProgram();
             break;
         case "list": //list out all items
-            int counter = 0;
-            System.out.println(line);
-            while (list[counter] != null) {
-                System.out.print((counter + 1) + ".");
-                System.out.print("[" + list[counter].getStatusIcon() + "] ");
-                System.out.println(list[counter].getDescription());
-                counter++;
-            }
-            System.out.println(line);
+            listOutItems();
             break;
 
-        default: //default case add userInput to the list
-            list[listLength] = new Task(userInput);
-            listLength++;
-            System.out.println(line);
-            System.out.println("    " + "Neigh! added: " + userInput);
-            System.out.println(line);
+        //handle task types
+        case "todo":
+            addItemToList(userInputArray, TaskType.TODO);
+            break;
+        case "deadline":
+            addItemToList(userInputArray, TaskType.DEADLINE);
+            break;
+        case "event":
+            addItemToList(userInputArray, TaskType.EVENT);
             break;
 
+        default: //let the user know of an invalid input
+            invalidInputResponse();
         }
+    }
+
+    public static void intro() {    //print the chatbot's introductory message
+        System.out.println(LOGO + "\n   Neigh! I'm a Horse! How can i assist you?");
+        System.out.println(LINE);
+    }
+
+    private static void invalidInputResponse() {
+        System.out.println(LINE);
+        System.out.print(INDENT);
+        System.out.println("Invalid! If there's nothing to do, I'm gonna go eat grass...");
+        System.out.println(LINE);
+    }
+
+    private static void markItemAsDone(String[] userInputArray) {
+        int markingIndex;
+        markingIndex = Integer.parseInt(userInputArray[1]) - 1;
+        list[markingIndex].setDone(true);
+        System.out.println(LINE);
+        System.out.print(INDENT);
+        System.out.println("Neigh! I've marked this task as done:");
+        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
+        System.out.println(list[markingIndex].getDescription());
+        System.out.println(LINE);
+    }
+
+    private static void unmarkItem(String[] userInputArray) {
+        int markingIndex;
+        markingIndex = Integer.parseInt(userInputArray[1]) - 1;
+        list[markingIndex].setDone(false);
+        System.out.println(LINE);
+        System.out.print(INDENT);
+        System.out.println("Neigh... This task has been marked undone:");
+        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
+        System.out.println(list[markingIndex].getDescription());
+        System.out.println(LINE);
+    }
+
+    private static void exitProgram() {
+        System.out.println(LINE);
+        System.out.print(INDENT);
+        System.out.println("Bye bye! It was Neigh-ce to meet you!");
+        System.out.println(LINE);
+        System.exit(0);
+    }
+
+    private static void listOutItems() {
+        int counter = 0;
+        System.out.println(LINE);
+        System.out.println(INDENT + "Neigh! Here are your Tasks!");
+        while (list[counter] != null) {
+            System.out.print(INDENT);
+            System.out.print((counter + 1) + ".");
+            System.out.println(list[counter].toString());
+            counter++;
+        }
+        System.out.println(LINE);
+    }
+
+    private static void addItemToList(String[] userInputArray, TaskType taskType) {
+        String[] parsedUserInputArray = Arrays.copyOfRange(userInputArray, 1, userInputArray.length);//truncate the command from userInput
+        String parsedUserInput = String.join(" ", parsedUserInputArray);
+
+        switch (taskType) {
+        case TODO:
+            list[listLength] = new Todo(parsedUserInput, taskType);
+            break;
+        case DEADLINE:
+            String[] deadlineUserInput = parsedUserInput.split("/by"); //separate description from due date
+            list[listLength] = new Deadline(deadlineUserInput[0], deadlineUserInput[1]);
+            break;
+        case EVENT:
+            String[] splitUserInput = parsedUserInput.split("/from"); //separate description from timings
+            String description = splitUserInput[0];
+            String[] splitDescription = splitUserInput[1].split("/to");//separate from and to timings
+            String from = splitDescription[0];
+            String to = splitDescription[1];
+            list[listLength] = new Event(description, from, to);
+            break;
+        }
+
+        listLength++;
+        System.out.println(LINE);
+        System.out.println(INDENT + "Neigh! added: ");
+        System.out.println(INDENT + list[listLength - 1].toString());
+        System.out.println(INDENT + "Now you have " + listLength + " task(s) in the list!");
+        System.out.println(LINE);
     }
 
 
     public static void main(String[] args) {
         intro();
         while (true) {
-            record();
+            handleInput();
         }
     }
 }

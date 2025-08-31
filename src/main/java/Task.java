@@ -1,6 +1,7 @@
 public class Task {
     protected String description;
     protected boolean isDone;
+    protected TaskType taskType; //default TaskType
 
     public Task(String description) {
         this.description = description;
@@ -17,5 +18,10 @@ public class Task {
 
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + getStatusIcon() + "] " + getDescription();
     }
 }
