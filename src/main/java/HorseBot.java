@@ -2,7 +2,7 @@ import java.util.Scanner;
 import java.util.Arrays;
 
 public class HorseBot {
-    public static final int MAX_RECORDS = 100; //maximum list size
+    public static final int MAX_RECORDS = 100;
     static String INDENT = "    ";
     static String LINE = "______________________________________________________________________";
     static String LOGO = """
@@ -58,91 +58,112 @@ public class HorseBot {
         }
     }
 
-    public static void intro() {    //print the chatbot's introductory message
-        System.out.println(LOGO + "\n   Neigh! I'm a Horse! How can i assist you?");
-        System.out.println(LINE);
-    }
-
-    private static void invalidInputResponse() {
-        System.out.println(LINE);
-        System.out.print(INDENT);
-        System.out.println("Invalid! If there's nothing to do, I'm gonna go eat grass...");
-        System.out.println(LINE);
-    }
-
-    private static void markItemAsDone(String[] userInputArray) {
-        int markingIndex;
-        markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-        list[markingIndex].setDone(true);
-        System.out.println(LINE);
-        System.out.print(INDENT);
-        System.out.println("Neigh! I've marked this task as done:");
-        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
-        System.out.println(list[markingIndex].getDescription());
-        System.out.println(LINE);
-    }
-
-    private static void unmarkItem(String[] userInputArray) {
-        int markingIndex;
-        markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-        list[markingIndex].setDone(false);
-        System.out.println(LINE);
-        System.out.print(INDENT);
-        System.out.println("Neigh... This task has been marked undone:");
-        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
-        System.out.println(list[markingIndex].getDescription());
-        System.out.println(LINE);
-    }
-
-    private static void exitProgram() {
-        System.out.println(LINE);
-        System.out.print(INDENT);
-        System.out.println("Bye bye! It was Neigh-ce to meet you!");
-        System.out.println(LINE);
-        System.exit(0);
-    }
-
-    private static void listOutItems() {
-        int counter = 0;
-        System.out.println(LINE);
-        System.out.println(INDENT + "Neigh! Here are your Tasks!");
-        while (list[counter] != null) {
-            System.out.print(INDENT);
-            System.out.print((counter + 1) + ".");
-            System.out.println(list[counter].toString());
-            counter++;
-        }
-        System.out.println(LINE);
-    }
-
     private static void addItemToList(String[] userInputArray, TaskType taskType) {
         String[] parsedUserInputArray = Arrays.copyOfRange(userInputArray, 1, userInputArray.length);//truncate the command from userInput
         String parsedUserInput = String.join(" ", parsedUserInputArray);
 
         switch (taskType) {
         case TODO:
-            list[listLength] = new Todo(parsedUserInput, taskType);
+            addTodo(taskType, parsedUserInput);
             break;
         case DEADLINE:
-            String[] deadlineUserInput = parsedUserInput.split("/by"); //separate description from due date
-            list[listLength] = new Deadline(deadlineUserInput[0], deadlineUserInput[1]);
+            addDeadline(parsedUserInput);
             break;
         case EVENT:
-            String[] splitUserInput = parsedUserInput.split("/from"); //separate description from timings
-            String description = splitUserInput[0];
-            String[] splitDescription = splitUserInput[1].split("/to");//separate from and to timings
-            String from = splitDescription[0];
-            String to = splitDescription[1];
-            list[listLength] = new Event(description, from, to);
+            addEvent(parsedUserInput);
             break;
         }
 
         listLength++;
-        System.out.println(LINE);
+        printLine();
         System.out.println(INDENT + "Neigh! added: ");
         System.out.println(INDENT + list[listLength - 1].toString());
         System.out.println(INDENT + "Now you have " + listLength + " task(s) in the list!");
+        printLine();
+    }
+
+    public static void intro() {    //print the chatbot's introductory message
+        System.out.println(LOGO);
+        System.out.println(INDENT + "Neigh! I'm a Horse! How can i assist you?");
+        printLine();
+    }
+
+    private static void invalidInputResponse() {
+        printLine();
+        printIndent();
+        System.out.println("Invalid! If there's nothing to do, I'm gonna go eat grass...");
+        printLine();
+    }
+
+    private static void markItemAsDone(String[] userInputArray) {
+        int markingIndex;
+        markingIndex = Integer.parseInt(userInputArray[1]) - 1;
+        list[markingIndex].setDone(true);
+        printLine();
+        printIndent();
+        System.out.println("Neigh! I've marked this task as done:");
+        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
+        System.out.println(list[markingIndex].getDescription());
+        printLine();
+    }
+
+    private static void unmarkItem(String[] userInputArray) {
+        int markingIndex;
+        markingIndex = Integer.parseInt(userInputArray[1]) - 1;
+        list[markingIndex].setDone(false);
+        printLine();
+        printIndent();
+        System.out.println("Neigh... This task has been marked undone:");
+        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
+        System.out.println(list[markingIndex].getDescription());
+        printLine();
+    }
+
+    private static void exitProgram() {
+        printLine();
+        printIndent();
+        System.out.println("Bye bye! It was Neigh-ce to meet you!");
+        printLine();
+        System.exit(0);
+    }
+
+    private static void listOutItems() {
+        int counter = 0;
+        printLine();
+        System.out.println(INDENT + "Neigh! Here are your Tasks!");
+        while (list[counter] != null) {
+            printIndent();
+            System.out.print((counter + 1) + ".");
+            System.out.println(list[counter].toString());
+            counter++;
+        }
+        printLine();
+    }
+
+    private static void addEvent(String parsedUserInput) {
+        String[] splitUserInput = parsedUserInput.split("/from"); //separate description from timings
+        String description = splitUserInput[0];
+        String[] splitDescription = splitUserInput[1].split("/to");//separate from and to timings
+        String from = splitDescription[0];
+        String to = splitDescription[1];
+        list[listLength] = new Event(description, from, to);
+    }
+
+    private static void addDeadline(String parsedUserInput) {
+        String[] deadlineUserInput = parsedUserInput.split("/by"); //separate description from due date
+        list[listLength] = new Deadline(deadlineUserInput[0], deadlineUserInput[1]);
+    }
+
+    private static void addTodo(TaskType taskType, String parsedUserInput) {
+        list[listLength] = new Todo(parsedUserInput, taskType);
+    }
+
+    private static void printLine() {
         System.out.println(LINE);
+    }
+
+    private static void printIndent() {
+        System.out.print(INDENT);
     }
 
 
