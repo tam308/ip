@@ -56,7 +56,7 @@ public class HorseBot {
             default: //let the user know of an invalid input
                 throw new HorseBotException("Invalid input! If there's nothing to do, I'm gonna go eat grass...");
             }
-        } catch (Exception e) {
+        } catch (HorseBotException e) {
             printLine();
             System.out.println(INDENT + e.getMessage());
             printLine();
@@ -140,18 +140,72 @@ public class HorseBot {
         printLine();
     }
 
-    private static void addEvent(String parsedUserInput) {
-        String[] splitUserInput = parsedUserInput.split("/from"); //separate description from timings
-        String description = splitUserInput[0];
-        String[] splitDescription = splitUserInput[1].split("/to");//separate from and to timings
-        String from = splitDescription[0];
+    private static void addEvent(String parsedUserInput) throws HorseBotException {
+        String[] splitUserInput = parsedUserInput.split("/from",2); //separate description from timings
+        String description = splitUserInput[0].trim();
+
+        checkEventCommandFrom(splitUserInput); //check for /from
+        checkEventDescriptionEmpty(description);
+
+        String[] splitDescription = splitUserInput[1].split("/to",2);//separate from and to timings
+        String from = splitDescription[0].trim();
+
+        checkEventCommandTo(splitDescription); //check for /to
+
         String to = splitDescription[1];
+        checkEventFromToEmpty(from, to);
         list[listLength] = new Event(description, from, to);
     }
 
-    private static void addDeadline(String parsedUserInput) {
-        String[] deadlineUserInput = parsedUserInput.split("/by"); //separate description from due date
-        list[listLength] = new Deadline(deadlineUserInput[0], deadlineUserInput[1]);
+    private static void checkEventDescriptionEmpty(String description) throws HorseBotException {
+        if (description.isEmpty()) {
+            throw new HorseBotException("Neigh! Description is empty!");
+        }
+    }
+
+    private static void checkEventCommandTo(String[] splitDescription) throws HorseBotException {
+        if (splitDescription.length < 2) { // /to missing in input
+            throw new HorseBotException("Neigh! End time command missing! set one by using /to [time]");
+        }
+    }
+
+    private static void checkEventCommandFrom(String[] splitUserInput) throws HorseBotException {
+        if (splitUserInput.length < 2) { // /from missing in input
+            throw new HorseBotException("Neigh! Start time command missing! set one by using /from [time]");
+        }
+    }
+
+    private static void checkEventFromToEmpty(String from, String to) throws HorseBotException {
+        if (from.isEmpty()) {
+            throw new HorseBotException("Neigh! Start time is empty!");
+        }
+        if (to.isEmpty()) {
+            throw new HorseBotException("Neigh! End time is empty!");
+        }
+    }
+
+    private static void addDeadline(String parsedUserInput) throws HorseBotException {
+        String[] deadlineUserInput = parsedUserInput.split("/by",2);//separate description from due date
+        checkForDeadlineCommandBy(deadlineUserInput); //check if /by was given
+        String description = deadlineUserInput[0].trim();
+        String by = deadlineUserInput[1].trim();
+        checkDeadlineParametersEmpty(description, by); //check if Parameters are empty
+        list[listLength] = new Deadline(description, by);
+    }
+
+    private static void checkForDeadlineCommandBy(String[] deadlineUserInput) throws HorseBotException {
+        if (deadlineUserInput.length < 2) {
+            throw new HorseBotException("Neigh! By command missing! set one by using /by [deadline]");
+        }
+    }
+
+    private static void checkDeadlineParametersEmpty(String description, String by) throws HorseBotException {
+        if (description.isEmpty()) {
+            throw new HorseBotException("Neigh! Description is empty!");
+        }
+        if (by.isEmpty()) {
+            throw new HorseBotException("Neigh! Deadline is empty!");
+        }
     }
 
     private static void addTodo(TaskType taskType, String parsedUserInput) {
