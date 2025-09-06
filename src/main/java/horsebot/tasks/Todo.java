@@ -1,3 +1,5 @@
+package horsebot.tasks;
+
 public class Todo extends Task {
     public Todo(String description, TaskType taskType) {
         super(description);

@@ -1,3 +1,11 @@
+package horsebot;
+
+import horsebot.tasks.Deadline;
+import horsebot.tasks.Event;
+import horsebot.tasks.Task;
+import horsebot.tasks.TaskType;
+import horsebot.tasks.Todo;
+
 import java.util.Scanner;
 import java.util.Arrays;
 
