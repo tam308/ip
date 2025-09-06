@@ -27,41 +27,48 @@ public class HorseBot {
         userInput = in.nextLine();
         String[] userInputArray = userInput.split(" ");
         String command = userInputArray[0]; //read the first word in user input as command
+        try {
+            switch (command) {
+            case "mark": //mark a task as done
+                markItemAsDone(userInputArray);
+                break;
+            case "unmark": //mark a task as undone
+                unmarkItem(userInputArray);
+                break;
+            case "bye": //terminate program
+                exitProgram();
+                break;
+            case "list": //list out all items
+                listOutItems();
+                break;
 
-        switch (command) {
-        case "mark": //mark a task as done
-            markItemAsDone(userInputArray);
-            break;
-        case "unmark": //mark a task as undone
-            unmarkItem(userInputArray);
-            break;
-        case "bye": //terminate program
-            exitProgram();
-            break;
-        case "list": //list out all items
-            listOutItems();
-            break;
+            //handle task types
+            case "todo":
+                addItemToList(userInputArray, TaskType.TODO);
+                break;
+            case "deadline":
+                addItemToList(userInputArray, TaskType.DEADLINE);
+                break;
+            case "event":
+                addItemToList(userInputArray, TaskType.EVENT);
+                break;
 
-        //handle task types
-        case "todo":
-            addItemToList(userInputArray, TaskType.TODO);
-            break;
-        case "deadline":
-            addItemToList(userInputArray, TaskType.DEADLINE);
-            break;
-        case "event":
-            addItemToList(userInputArray, TaskType.EVENT);
-            break;
-
-        default: //let the user know of an invalid input
-            invalidInputResponse();
+            default: //let the user know of an invalid input
+                throw new HorseBotException("Invalid input! If there's nothing to do, I'm gonna go eat grass...");
+            }
+        } catch (Exception e) {
+            printLine();
+            System.out.println(INDENT + e.getMessage());
+            printLine();
         }
     }
 
-    private static void addItemToList(String[] userInputArray, TaskType taskType) {
+    private static void addItemToList(String[] userInputArray, TaskType taskType) throws HorseBotException {
         String[] parsedUserInputArray = Arrays.copyOfRange(userInputArray, 1, userInputArray.length);//truncate the command from userInput
         String parsedUserInput = String.join(" ", parsedUserInputArray);
-
+        if (parsedUserInput.isBlank()) {
+            throw new HorseBotException("Neigh??? Description can't be empty!");
+        }
         switch (taskType) {
         case TODO:
             addTodo(taskType, parsedUserInput);
@@ -85,13 +92,6 @@ public class HorseBot {
     public static void intro() {    //print the chatbot's introductory message
         System.out.println(LOGO);
         System.out.println(INDENT + "Neigh! I'm a Horse! How can i assist you?");
-        printLine();
-    }
-
-    private static void invalidInputResponse() {
-        printLine();
-        printIndent();
-        System.out.println("Invalid! If there's nothing to do, I'm gonna go eat grass...");
         printLine();
     }
 
