@@ -95,9 +95,15 @@ public class HorseBot {
         printLine();
     }
 
-    private static void markItemAsDone(String[] userInputArray) {
+    private static void markItemAsDone(String[] userInputArray) throws HorseBotException {
+        if (userInputArray.length < 2) {
+            throw new HorseBotException("Neigh? Which task should i mark?");
+        }
         int markingIndex;
         markingIndex = Integer.parseInt(userInputArray[1]) - 1;
+        if (list[markingIndex] == null){
+            throw new HorseBotException("Neigh? That doesnt exist!");
+        }
         list[markingIndex].setDone(true);
         printLine();
         printIndent();
@@ -107,9 +113,15 @@ public class HorseBot {
         printLine();
     }
 
-    private static void unmarkItem(String[] userInputArray) {
+    private static void unmarkItem(String[] userInputArray) throws HorseBotException {
+        if (userInputArray.length < 2) {
+            throw new HorseBotException("Neigh? Which task should i unmark?");
+        }
         int markingIndex;
         markingIndex = Integer.parseInt(userInputArray[1]) - 1;
+        if (list[markingIndex] == null){
+            throw new HorseBotException("Neigh? That doesnt exist!");
+        }
         list[markingIndex].setDone(false);
         printLine();
         printIndent();
@@ -141,13 +153,13 @@ public class HorseBot {
     }
 
     private static void addEvent(String parsedUserInput) throws HorseBotException {
-        String[] splitUserInput = parsedUserInput.split("/from",2); //separate description from timings
+        String[] splitUserInput = parsedUserInput.split("/from", 2); //separate description from timings
         String description = splitUserInput[0].trim();
 
         checkEventCommandFrom(splitUserInput); //check for /from
         checkEventDescriptionEmpty(description);
 
-        String[] splitDescription = splitUserInput[1].split("/to",2);//separate from and to timings
+        String[] splitDescription = splitUserInput[1].split("/to", 2);//separate from and to timings
         String from = splitDescription[0].trim();
 
         checkEventCommandTo(splitDescription); //check for /to
@@ -185,7 +197,7 @@ public class HorseBot {
     }
 
     private static void addDeadline(String parsedUserInput) throws HorseBotException {
-        String[] deadlineUserInput = parsedUserInput.split("/by",2);//separate description from due date
+        String[] deadlineUserInput = parsedUserInput.split("/by", 2);//separate description from due date
         checkForDeadlineCommandBy(deadlineUserInput); //check if /by was given
         String description = deadlineUserInput[0].trim();
         String by = deadlineUserInput[1].trim();
