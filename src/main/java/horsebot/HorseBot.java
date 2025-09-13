@@ -6,11 +6,11 @@ import horsebot.tasks.Task;
 import horsebot.tasks.TaskType;
 import horsebot.tasks.Todo;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Arrays;
 
 public class HorseBot {
-    public static final int MAX_RECORDS = 100;
     static String INDENT = "    ";
     static String LINE = "______________________________________________________________________";
     static String LOGO = """
@@ -25,8 +25,7 @@ public class HorseBot {
             '--------------------------------------------------------------------'""";
     //ascii art generated with https://www.asciiart.eu/text-to-ascii-art
 
-    static Task[] list = new Task[MAX_RECORDS]; //initialise array of Tasks
-    static int listLength = 0;
+    static ArrayList<Task> list = new ArrayList<>(); //initialise array of Tasks
 
     //handle user inputs
     public static void handleInput() {
@@ -48,6 +47,9 @@ public class HorseBot {
                 break;
             case "list": //list out all items
                 listOutItems();
+                break;
+            case "delete":
+                deleteItemFromList(userInputArray);
                 break;
 
             //handle task types
@@ -71,6 +73,20 @@ public class HorseBot {
         }
     }
 
+    private static void deleteItemFromList(String[] userInputArray) throws HorseBotException {
+        if (userInputArray.length < 2) {
+            throw new HorseBotException("Neigh? Nothing to delete there???");
+        }
+        int markingIndex = Integer.parseInt(userInputArray[1]) - 1;
+        if (markingIndex > list.size() - 1) {
+            throw new HorseBotException("Neigh? Doesn't exist???");
+        }
+        System.out.println("Neigh! Task removed!:");
+        System.out.println(list.get(markingIndex).toString());
+        printLine();
+        list.remove(markingIndex);
+    }
+
     private static void addItemToList(String[] userInputArray, TaskType taskType) throws HorseBotException {
         String[] parsedUserInputArray = Arrays.copyOfRange(userInputArray, 1, userInputArray.length);//truncate the command from userInput
         String parsedUserInput = String.join(" ", parsedUserInputArray);
@@ -88,12 +104,11 @@ public class HorseBot {
             addEvent(parsedUserInput);
             break;
         }
-
-        listLength++;
+        
         printLine();
         System.out.println(INDENT + "Neigh! added: ");
-        System.out.println(INDENT + list[listLength - 1].toString());
-        System.out.println(INDENT + "Now you have " + listLength + " task(s) in the list!");
+        System.out.println(INDENT + list.get(list.size() - 1).toString());
+        System.out.println(INDENT + "Now you have " + list.size() + " task(s) in the list!");
         printLine();
     }
 
@@ -109,15 +124,15 @@ public class HorseBot {
         }
         int markingIndex;
         markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-        if (list[markingIndex] == null){
+        if (markingIndex > list.size() - 1) { //out of bounds marking
             throw new HorseBotException("Neigh? That doesnt exist!");
         }
-        list[markingIndex].setDone(true);
+        list.get(markingIndex).setDone(true);
         printLine();
         printIndent();
         System.out.println("Neigh! I've marked this task as done:");
-        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
-        System.out.println(list[markingIndex].getDescription());
+        System.out.print(INDENT + "[" + list.get(markingIndex).getStatusIcon() + "] ");
+        System.out.println(list.get(markingIndex).getDescription());
         printLine();
     }
 
@@ -127,15 +142,15 @@ public class HorseBot {
         }
         int markingIndex;
         markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-        if (list[markingIndex] == null){
+        if (markingIndex > list.size() - 1) {
             throw new HorseBotException("Neigh? That doesnt exist!");
         }
-        list[markingIndex].setDone(false);
+        list.get(markingIndex).setDone(false);
         printLine();
         printIndent();
         System.out.println("Neigh... This task has been marked undone:");
-        System.out.print(INDENT + "[" + list[markingIndex].getStatusIcon() + "] ");
-        System.out.println(list[markingIndex].getDescription());
+        System.out.print(INDENT + "[" + list.get(markingIndex).getStatusIcon() + "] ");
+        System.out.println(list.get(markingIndex).getDescription());
         printLine();
     }
 
@@ -151,10 +166,10 @@ public class HorseBot {
         int counter = 0;
         printLine();
         System.out.println(INDENT + "Neigh! Here are your Tasks!");
-        while (list[counter] != null) {
+        while (counter < list.size()) {
             printIndent();
             System.out.print((counter + 1) + ".");
-            System.out.println(list[counter].toString());
+            System.out.println(list.get(counter).toString());
             counter++;
         }
         printLine();
@@ -174,7 +189,7 @@ public class HorseBot {
 
         String to = splitDescription[1];
         checkEventFromToEmpty(from, to);
-        list[listLength] = new Event(description, from, to);
+        list.add(new Event(description, from, to));
     }
 
     private static void checkEventDescriptionEmpty(String description) throws HorseBotException {
@@ -210,7 +225,7 @@ public class HorseBot {
         String description = deadlineUserInput[0].trim();
         String by = deadlineUserInput[1].trim();
         checkDeadlineParametersEmpty(description, by); //check if Parameters are empty
-        list[listLength] = new Deadline(description, by);
+        list.add(new Deadline(description, by));
     }
 
     private static void checkForDeadlineCommandBy(String[] deadlineUserInput) throws HorseBotException {
@@ -229,7 +244,7 @@ public class HorseBot {
     }
 
     private static void addTodo(TaskType taskType, String parsedUserInput) {
-        list[listLength] = new Todo(parsedUserInput, taskType);
+        list.add(new Todo(parsedUserInput, taskType));
     }
 
     private static void printLine() {
