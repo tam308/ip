@@ -6,8 +6,13 @@ import horsebot.tasks.Task;
 import horsebot.tasks.TaskType;
 import horsebot.tasks.Todo;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.Arrays;
+import java.io.File;
+import java.io.FileNotFoundException;
+
 
 public class HorseBot {
     public static final int MAX_RECORDS = 100;
@@ -31,11 +36,14 @@ public class HorseBot {
     //handle user inputs
     public static void handleInput() {
         String userInput;
+
         Scanner in = new Scanner(System.in);
         userInput = in.nextLine();
+
         String[] userInputArray = userInput.split(" ");
         String command = userInputArray[0]; //read the first word in user input as command
         try {
+            writeToFile(userInput); //write the user input to file for storage
             switch (command) {
             case "mark": //mark a task as done
                 markItemAsDone(userInputArray);
@@ -64,7 +72,7 @@ public class HorseBot {
             default: //let the user know of an invalid input
                 throw new HorseBotException("Invalid input! If there's nothing to do, I'm gonna go eat grass...");
             }
-        } catch (HorseBotException e) {
+        } catch (HorseBotException | IOException e) {
             printLine();
             System.out.println(INDENT + e.getMessage());
             printLine();
@@ -109,7 +117,7 @@ public class HorseBot {
         }
         int markingIndex;
         markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-        if (list[markingIndex] == null){
+        if (list[markingIndex] == null) {
             throw new HorseBotException("Neigh? That doesnt exist!");
         }
         list[markingIndex].setDone(true);
@@ -127,7 +135,7 @@ public class HorseBot {
         }
         int markingIndex;
         markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-        if (list[markingIndex] == null){
+        if (list[markingIndex] == null) {
             throw new HorseBotException("Neigh? That doesnt exist!");
         }
         list[markingIndex].setDone(false);
@@ -240,11 +248,61 @@ public class HorseBot {
         System.out.print(INDENT);
     }
 
+    private static void retrieveFileContents(String filePath) {
+        File f = new File("data/tasks.txt");
+        Scanner s = null; // create a Scanner using the File as the source
+        try {
+            s = new Scanner(f);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        while (s.hasNext()) {
+            String userInput = s.nextLine();
+            String[] userInputArray = userInput.split(" ");
+            String command = userInputArray[0];
+            try {
+                switch (command) {
+                case "todo":
+                    addItemToList(userInputArray, TaskType.TODO);
+                    break;
+                case "deadline":
+                    addItemToList(userInputArray, TaskType.DEADLINE);
+                    break;
+                case "event":
+                    addItemToList(userInputArray, TaskType.EVENT);
+                    break;
+                }
 
+            } catch (HorseBotException e) {
+                printLine();
+                System.out.println(INDENT + e.getMessage());
+                printLine();
+            }
+        }
+    }
+public static void writeToFile(String userInput)throws IOException {
+    FileWriter fw = new FileWriter("data/tasks.txt",true);
+    fw.write(userInput+ System.lineSeparator());
+    fw.close();
+}
     public static void main(String[] args) {
+        handleStoredList();
         intro();
         while (true) {
             handleInput();
+        }
+    }
+
+    private static void handleStoredList() {
+        File f = new File("data/tasks.txt");
+        if (!f.getParentFile().exists()) {
+            f.getParentFile().mkdir();
+        }
+        try {
+            f.createNewFile();
+            retrieveFileContents("data/tasks.txt");
+        } catch (IOException e) {
+            System.out.print(INDENT + "Neigh... File creation failed!");
         }
     }
 }
