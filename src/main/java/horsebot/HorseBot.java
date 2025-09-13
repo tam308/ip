@@ -42,7 +42,7 @@ public class HorseBot {
         String[] userInputArray = userInput.split(" ");
         String command = userInputArray[0]; //read the first word in user input as command
         try {
-            writeToFile(userInput); //write the user input to file for storage
+
             switch (command) {
             case "mark": //mark a task as done
                 markItemAsDone(userInputArray);
@@ -62,12 +62,15 @@ public class HorseBot {
 
             //handle task types
             case "todo":
+                writeToFile(userInput);
                 addItemToList(userInputArray, TaskType.TODO);
                 break;
             case "deadline":
+                writeToFile(userInput);
                 addItemToList(userInputArray, TaskType.DEADLINE);
                 break;
             case "event":
+                writeToFile(userInput);
                 addItemToList(userInputArray, TaskType.EVENT);
                 break;
 
@@ -81,18 +84,21 @@ public class HorseBot {
         }
     }
 
-    private static void deleteItemFromList(String[] userInputArray) throws HorseBotException {
+    private static void deleteItemFromList(String[] userInputArray) throws HorseBotException, IOException {
         if (userInputArray.length < 2) {
             throw new HorseBotException("Neigh? Nothing to delete there???");
         }
         int markingIndex = Integer.parseInt(userInputArray[1]) - 1;
-        if (markingIndex > list.size() - 1) {
+        if (markingIndex > list.size() - 1 || markingIndex < 0) {
             throw new HorseBotException("Neigh? Doesn't exist???");
         }
         System.out.println("Neigh! Task removed!:");
         System.out.println(list.get(markingIndex).toString());
         printLine();
         list.remove(markingIndex);
+
+        deleteFromFile(markingIndex);
+
     }
 
     private static void addItemToList(String[] userInputArray, TaskType taskType) throws HorseBotException {
@@ -126,7 +132,7 @@ public class HorseBot {
         printLine();
     }
 
-    private static void markItemAsDone(String[] userInputArray) throws HorseBotException {
+    private static void markItemAsDone(String[] userInputArray) throws HorseBotException,IOException {
         if (userInputArray.length < 2) {
             throw new HorseBotException("Neigh? Which task should i mark?");
         }
@@ -142,9 +148,11 @@ public class HorseBot {
         System.out.print(INDENT + "[" + list.get(markingIndex).getStatusIcon() + "] ");
         System.out.println(list.get(markingIndex).getDescription());
         printLine();
+
+        editDoneInFile(markingIndex,true);
     }
 
-    private static void unmarkItem(String[] userInputArray) throws HorseBotException {
+    private static void unmarkItem(String[] userInputArray) throws HorseBotException, IOException {
         if (userInputArray.length < 2) {
             throw new HorseBotException("Neigh? Which task should i unmark?");
         }
@@ -160,6 +168,8 @@ public class HorseBot {
         System.out.print(INDENT + "[" + list.get(markingIndex).getStatusIcon() + "] ");
         System.out.println(list.get(markingIndex).getDescription());
         printLine();
+
+        editDoneInFile(markingIndex,false);
     }
 
     private static void exitProgram() {
@@ -264,6 +274,7 @@ public class HorseBot {
     }
 
     private static void retrieveFileContents(String filePath) {
+        int lineLength = 0; //for flushing the screen after calling commands
         File f = new File("data/tasks.txt");
         Scanner s = null; // create a Scanner using the File as the source
         try {
@@ -272,8 +283,13 @@ public class HorseBot {
             throw new RuntimeException(e);
         }
         while (s.hasNext()) {
+            lineLength++;
             String userInput = s.nextLine();
-            String[] userInputArray = userInput.split(" ");
+            String[] separateDone = userInput.split(",");
+            boolean markedDone = Boolean.parseBoolean(separateDone[0]);
+
+            String[] userInputArray = separateDone[1].split(" ");
+            System.out.println(markedDone + userInputArray[0] + userInputArray[1]);
             String command = userInputArray[0];
             try {
                 switch (command) {
@@ -293,13 +309,61 @@ public class HorseBot {
                 System.out.println(INDENT + e.getMessage());
                 printLine();
             }
+            if (markedDone) {
+                list.get(lineLength - 1).setDone(true);
+            }
+        }
+        for (int i = 0; i < lineLength * 5; i++) { //flush the screen after calling commands
+            System.out.println();
         }
     }
-public static void writeToFile(String userInput)throws IOException {
-    FileWriter fw = new FileWriter("data/tasks.txt",true);
-    fw.write(userInput+ System.lineSeparator());
-    fw.close();
-}
+
+    public static void writeToFile(String userInput) throws IOException {
+        FileWriter fw = new FileWriter("data/tasks.txt", true);
+        fw.write("false," + userInput + System.lineSeparator());
+        fw.close();
+    }
+
+    public static void editDoneInFile(int markingIndex, boolean done) throws IOException {
+        File f = new File("data/tasks.txt");
+
+        Scanner s = new Scanner(f); //temporarily store current data in new list
+        ArrayList<String> lines = new ArrayList<>();
+        while (s.hasNext()) {
+            lines.add(s.nextLine());
+        }
+        s.close();
+        //replace old line with updated Done status
+        String oldLine = lines.get(markingIndex);
+        int commaIndex = oldLine.indexOf(",");
+        String newLine = (done) + "," + oldLine.substring(commaIndex + 1).trim();
+        lines.set(markingIndex, newLine);
+
+        FileWriter fw = new FileWriter(f);
+        for (String line : lines) {
+            fw.write(line + System.lineSeparator());
+        }
+        fw.close();
+    }
+
+    public static void deleteFromFile(int markingIndex) throws IOException {
+        File f = new File("data/tasks.txt");
+
+        Scanner s = new Scanner(f); //temporarily store current data in new list
+        ArrayList<String> lines = new ArrayList<>();
+        while (s.hasNext()) {
+            lines.add(s.nextLine());
+        }
+        s.close();
+
+        lines.remove(markingIndex);
+        FileWriter fw = new FileWriter(f);
+        for (String line : lines) {
+            fw.write(line + System.lineSeparator());
+        }
+        fw.close();
+    }
+
     public static void main(String[] args) {
         handleStoredList();
         intro();
@@ -319,5 +383,6 @@ public static void writeToFile(String userInput)throws IOException {
         } catch (IOException e) {
             System.out.print(INDENT + "Neigh... File creation failed!");
         }
+
     }
 }
