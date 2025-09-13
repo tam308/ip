@@ -273,10 +273,10 @@ public class HorseBot {
         System.out.print(INDENT);
     }
 
-    private static void retrieveFileContents(String filePath) {
+    private static void retrieveFileContents() {
         int lineLength = 0; //for flushing the screen after calling commands
         File f = new File("data/tasks.txt");
-        Scanner s = null; // create a Scanner using the File as the source
+        Scanner s; // create a Scanner using the File as the source
         try {
             s = new Scanner(f);
         } catch (FileNotFoundException e) {
@@ -313,7 +313,7 @@ public class HorseBot {
                 list.get(lineLength - 1).setDone(true);
             }
         }
-        for (int i = 0; i < lineLength * 5; i++) { //flush the screen after calling commands
+        for (int i = 0; i < 25; i++) { //flush the screen after calling commands
             System.out.println();
         }
     }
@@ -333,17 +333,21 @@ public class HorseBot {
             lines.add(s.nextLine());
         }
         s.close();
-        //replace old line with updated Done status
-        String oldLine = lines.get(markingIndex);
-        int commaIndex = oldLine.indexOf(",");
-        String newLine = (done) + "," + oldLine.substring(commaIndex + 1).trim();
-        lines.set(markingIndex, newLine);
+
+        updateLineToBeMarked(markingIndex, done, lines);         //replace old line with updated Done status
 
         FileWriter fw = new FileWriter(f);
         for (String line : lines) {
             fw.write(line + System.lineSeparator());
         }
         fw.close();
+    }
+
+    private static void updateLineToBeMarked(int markingIndex, boolean done, ArrayList<String> lines) {
+        String oldLine = lines.get(markingIndex);
+        int commaIndex = oldLine.indexOf(",");
+        String newLine = done + "," + oldLine.substring(commaIndex + 1).trim();
+        lines.set(markingIndex, newLine);
     }
 
     public static void deleteFromFile(int markingIndex) throws IOException {
@@ -379,7 +383,7 @@ public class HorseBot {
         }
         try {
             f.createNewFile();
-            retrieveFileContents("data/tasks.txt");
+            retrieveFileContents();
         } catch (IOException e) {
             System.out.print(INDENT + "Neigh... File creation failed!");
         }
