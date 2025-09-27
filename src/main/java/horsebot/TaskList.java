@@ -9,6 +9,7 @@ import horsebot.tasks.Todo;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class TaskList {
     static ArrayList<Task> list = new ArrayList<>(); //initialise array of Tasks
@@ -55,7 +56,7 @@ public class TaskList {
         Ui.printLine();
     }
 
-    static void markItemAsDone(String[] userInputArray) throws HorseBotException,IOException {
+    static void markItemAsDone(String[] userInputArray) throws HorseBotException, IOException {
         if (userInputArray.length < 2) {
             throw new HorseBotException("Neigh? Which task should i mark?");
         }
@@ -72,7 +73,7 @@ public class TaskList {
         System.out.println(list.get(markingIndex).getDescription());
         Ui.printLine();
 
-        Storage.editDoneInFile(markingIndex,true);
+        Storage.editDoneInFile(markingIndex, true);
     }
 
     static void unmarkItem(String[] userInputArray) throws HorseBotException, IOException {
@@ -92,7 +93,7 @@ public class TaskList {
         System.out.println(list.get(markingIndex).getDescription());
         Ui.printLine();
 
-        Storage.editDoneInFile(markingIndex,false);
+        Storage.editDoneInFile(markingIndex, false);
     }
 
     static void listOutItems() {
@@ -178,5 +179,25 @@ public class TaskList {
 
     private static void addTodo(TaskType taskType, String parsedUserInput) {
         list.add(new Todo(parsedUserInput, taskType));
+    }
+
+    static void findInList(String[] userInputArray) throws HorseBotException {
+        String parsedUserInput = Arrays.stream(userInputArray, 1, userInputArray.length).collect(Collectors.joining(" "));
+        if (parsedUserInput.isBlank()) {
+            throw new HorseBotException("Neigh??? What are you searching for?");
+        }
+        System.out.println(parsedUserInput);
+        int counter = 0;
+        Ui.printLine();
+        System.out.println(Ui.INDENT + "Neigh! Here are the matching tasks in your list:");
+        while (counter < list.size()) {
+            if (list.get(counter).getDescription().contains(parsedUserInput)) {
+                Ui.printIndent();
+                System.out.print((counter + 1) + ".");
+                System.out.println(list.get(counter).toString());
+            }
+            counter++;
+        }
+        Ui.printLine();
     }
 }

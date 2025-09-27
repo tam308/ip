@@ -48,6 +48,9 @@ public class Parser {
                 Storage.writeToFile(userInput);
                 TaskList.addItemToList(userInputArray, TaskType.EVENT);
                 break;
+            case "find":
+                TaskList.findInList(userInputArray);
+                break;
 
             default: //let the user know of an invalid input
                 throw new HorseBotException("Invalid input! If there's nothing to do, I'm gonna go eat grass...");
@@ -58,4 +61,5 @@ public class Parser {
             Ui.printLine();
         }
     }
+
 }
