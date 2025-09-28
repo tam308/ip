@@ -191,13 +191,17 @@ public class TaskList {
         Ui.printLine();
         System.out.println(Ui.INDENT + "Neigh! Here are the matching tasks in your list:");
         while (counter < list.size()) {
-            if (list.get(counter).getDescription().contains(parsedUserInput)) {
-                Ui.printIndent();
-                System.out.print((counter + 1) + ".");
-                System.out.println(list.get(counter).toString());
-            }
+            checkItemInList(counter, parsedUserInput);
             counter++;
         }
         Ui.printLine();
+    }
+
+    private static void checkItemInList(int counter, String parsedUserInput) {
+        if (list.get(counter).getDescription().contains(parsedUserInput)) {
+            Ui.printIndent();
+            System.out.print((counter + 1) + ".");
+            System.out.println(list.get(counter).toString());
+        }
     }
 }
