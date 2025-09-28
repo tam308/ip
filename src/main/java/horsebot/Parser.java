@@ -5,9 +5,16 @@ import horsebot.tasks.TaskType;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Parses user keyboard input.
+ */
 public class Parser {
 
-    //handle user inputs
+    /**
+     * Reads and interprets a line of user keyboard input.
+     * Extracts command keyword as the first word.
+     * Calls the appropriate execution method from TaskList.
+     */
     public static void handleInput() {
         String userInput;
 

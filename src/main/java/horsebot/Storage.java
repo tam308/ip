@@ -9,7 +9,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Handles saving and loading of list data to a .txt file
+ */
 public class Storage {
+    /**
+     * Retrieves previously stored list data from .txt file.
+     */
     private static void retrieveFileContents() {
         int lineLength = 0; //for flushing the screen after calling commands
         File f = new File("data/tasks.txt");
@@ -55,6 +61,10 @@ public class Storage {
         }
     }
 
+    /**
+     * Search for existing .txt file under folder data/tasks.txt.
+     * Creates tasks.txt and its parent folder if it does not exist.
+     */
     static void handleStoredList() {
         File f = new File("data/tasks.txt");
         if (!f.getParentFile().exists()) {
@@ -69,6 +79,12 @@ public class Storage {
 
     }
 
+    /**
+     * Deletes an item from the list stored in tasks.txt.
+     *
+     * @param markingIndex Index of the item to be deleted.
+     * @throws IOException if error occurs while trying to write to storage.
+     */
     public static void deleteFromFile(int markingIndex) throws IOException {
         File f = new File("data/tasks.txt");
 
@@ -87,12 +103,25 @@ public class Storage {
         fw.close();
     }
 
+    /**
+     * Appends new list entry contents to tasks.txt.
+     *
+     * @param userInput String containing information to be written to tasks.txt.
+     * @throws IOException if error occurs while trying to write to storage.
+     */
     public static void writeToFile(String userInput) throws IOException {
         FileWriter fw = new FileWriter("data/tasks.txt", true);
         fw.write("false," + userInput + System.lineSeparator());
         fw.close();
     }
 
+    /**
+     * Mark or unmark an item as done in list as done in tasks.txt.
+     *
+     * @param markingIndex Index of the item to be marked.
+     * @param done         determines if item is to be marked as done or undone.
+     * @throws IOException if error occurs while trying to write to storage.
+     */
     public static void editDoneInFile(int markingIndex, boolean done) throws IOException {
         File f = new File("data/tasks.txt");
 
@@ -112,6 +141,13 @@ public class Storage {
         fw.close();
     }
 
+    /**
+     * Handles formatting of item to be marked done or undone.
+     *
+     * @param markingIndex Index of the item to be edited.
+     * @param done         determines if item is to be marked as done or undone.
+     * @param lines        line to be edited as read from tasks.txt.
+     */
     private static void updateLineToBeMarked(int markingIndex, boolean done, ArrayList<String> lines) {
         String oldLine = lines.get(markingIndex);
         int commaIndex = oldLine.indexOf(",");
