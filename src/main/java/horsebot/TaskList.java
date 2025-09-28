@@ -11,9 +11,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/**
+ * Represents all tasks handled by the chatbot.
+ */
 public class TaskList {
     static ArrayList<Task> list = new ArrayList<>(); //initialise array of Tasks
 
+    /**
+     * Removes an entry from the task list.
+     *
+     * @param userInputArray user input stored as an array of strings.
+     * @throws IOException       if error occurs while trying to write to storage.
+     * @throws HorseBotException if index is not provided or invalid.
+     */
     static void deleteItemFromList(String[] userInputArray) throws HorseBotException, IOException {
         if (userInputArray.length < 2) {
             throw new HorseBotException("Neigh? Nothing to delete there???");
@@ -31,6 +41,13 @@ public class TaskList {
 
     }
 
+    /**
+     * Appends an entry to the task list.
+     *
+     * @param userInputArray user input stored as an array of strings.
+     * @param taskType       the type of task to add (TODO,DEADLINE,EVENT)
+     * @throws HorseBotException if task does not contain a description.
+     */
     static void addItemToList(String[] userInputArray, TaskType taskType) throws HorseBotException {
         String[] parsedUserInputArray = Arrays.copyOfRange(userInputArray, 1, userInputArray.length);//truncate the command from userInput
         String parsedUserInput = String.join(" ", parsedUserInputArray);
@@ -56,6 +73,13 @@ public class TaskList {
         Ui.printLine();
     }
 
+    /**
+     * Mark an existing item in the task list as done.
+     *
+     * @param userInputArray user input stored as an array of strings.
+     * @throws IOException       if error occurs while trying to write to storage.
+     * @throws HorseBotException if index is not provided or invalid.
+     */
     static void markItemAsDone(String[] userInputArray) throws HorseBotException, IOException {
         if (userInputArray.length < 2) {
             throw new HorseBotException("Neigh? Which task should i mark?");
@@ -76,6 +100,13 @@ public class TaskList {
         Storage.editDoneInFile(markingIndex, true);
     }
 
+    /**
+     * Mark an existing item in the task list as not done.
+     *
+     * @param userInputArray user input stored as an array of strings.
+     * @throws IOException       if error occurs while trying to write to storage.
+     * @throws HorseBotException if index is not provided or invalid.
+     */
     static void unmarkItem(String[] userInputArray) throws HorseBotException, IOException {
         if (userInputArray.length < 2) {
             throw new HorseBotException("Neigh? Which task should i unmark?");
@@ -96,6 +127,10 @@ public class TaskList {
         Storage.editDoneInFile(markingIndex, false);
     }
 
+    /**
+     * Print out all items in the current task list.
+     *
+     */
     static void listOutItems() {
         int counter = 0;
         Ui.printLine();
@@ -109,6 +144,12 @@ public class TaskList {
         Ui.printLine();
     }
 
+    /**
+     * Add an Event type task to the tasklist.
+     *
+     * @param parsedUserInput user input as a String with its command trimmed.
+     * @throws HorseBotException if syntax is invalid or information is missing.
+     */
     private static void addEvent(String parsedUserInput) throws HorseBotException {
         String[] splitUserInput = parsedUserInput.split("/from", 2); //separate description from timings
         String description = splitUserInput[0].trim();
@@ -126,6 +167,9 @@ public class TaskList {
         list.add(new Event(description, from, to));
     }
 
+    /**
+     * Validate inputs of addEvent method.
+     */
     private static void checkEventDescriptionEmpty(String description) throws HorseBotException {
         if (description.isEmpty()) {
             throw new HorseBotException("Neigh! Description is empty!");
@@ -153,6 +197,12 @@ public class TaskList {
         }
     }
 
+    /**
+     * Add a Deadline type task to the tasklist.
+     *
+     * @param parsedUserInput user input as a String with its command trimmed.
+     * @throws HorseBotException if syntax is invalid or information is missing.
+     */
     private static void addDeadline(String parsedUserInput) throws HorseBotException {
         String[] deadlineUserInput = parsedUserInput.split("/by", 2);//separate description from due date
         checkForDeadlineCommandBy(deadlineUserInput); //check if /by was given
@@ -162,6 +212,9 @@ public class TaskList {
         list.add(new Deadline(description, by));
     }
 
+    /**
+     * Validate inputs of addDeadline method.
+     */
     private static void checkForDeadlineCommandBy(String[] deadlineUserInput) throws HorseBotException {
         if (deadlineUserInput.length < 2) {
             throw new HorseBotException("Neigh! By command missing! set one by using /by [deadline]");
@@ -177,10 +230,22 @@ public class TaskList {
         }
     }
 
+    /**
+     * Add a Todo type task to the tasklist.
+     *
+     * @param taskType        the task type to be added.
+     * @param parsedUserInput user input as a String with its command trimmed.
+     */
     private static void addTodo(TaskType taskType, String parsedUserInput) {
         list.add(new Todo(parsedUserInput, taskType));
     }
 
+    /**
+     * search for items containing keyword in the current task list.
+     *
+     * @param userInputArray user input as an array.
+     * @throws HorseBotException if no keyword is provided.
+     */
     static void findInList(String[] userInputArray) throws HorseBotException {
         String parsedUserInput = Arrays.stream(userInputArray, 1, userInputArray.length).collect(Collectors.joining(" "));
         if (parsedUserInput.isBlank()) {
@@ -197,6 +262,12 @@ public class TaskList {
         Ui.printLine();
     }
 
+    /**
+     * Prints a task if it's description contains the keyword.
+     *
+     * @param counter         index of the current task in the list.
+     * @param parsedUserInput the search keyword.
+     */
     private static void checkItemInList(int counter, String parsedUserInput) {
         if (list.get(counter).getDescription().contains(parsedUserInput)) {
             Ui.printIndent();
