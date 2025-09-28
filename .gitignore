@@ -20,3 +20,4 @@ bin/
 text-ui-test/EXPECTED-UNIX.TXT
 data/tasks.txt
 src/main/java/META-INF/MANIFEST.MF
+src/main/java/data/tasks.txt

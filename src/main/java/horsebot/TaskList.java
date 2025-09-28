@@ -32,6 +32,7 @@ public class TaskList {
         if (markingIndex > list.size() - 1 || markingIndex < 0) {
             throw new HorseBotException("Neigh? Doesn't exist???");
         }
+        Ui.printLine();
         System.out.println("Neigh! Task removed!:");
         System.out.println(list.get(markingIndex).toString());
         Ui.printLine();
@@ -251,7 +252,6 @@ public class TaskList {
         if (parsedUserInput.isBlank()) {
             throw new HorseBotException("Neigh??? What are you searching for?");
         }
-        System.out.println(parsedUserInput);
         int counter = 0;
         Ui.printLine();
         System.out.println(Ui.INDENT + "Neigh! Here are the matching tasks in your list:");
