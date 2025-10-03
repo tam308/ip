@@ -17,9 +17,9 @@ public class Storage {
      * Retrieves previously stored list data from .txt file.
      */
     private static void retrieveFileContents() {
-        int lineLength = 0; //for flushing the screen after calling commands
+        int lineLength = 0;
         File f = new File("data/tasks.txt");
-        Scanner s; // create a Scanner using the File as the source
+        Scanner s;
         try {
             s = new Scanner(f);
         } catch (FileNotFoundException e) {
@@ -56,7 +56,7 @@ public class Storage {
                 TaskList.list.get(lineLength - 1).setDone(true);
             }
         }
-        for (int i = 0; i < 25; i++) { //flush the screen after calling commands
+        for (int i = 0; i < 100; i++) { //flush the screen after calling commands
             System.out.println();
         }
     }
